@@ -13,10 +13,12 @@ individual (Run By Warehouse).
 inventario 
 
 RF-03 (Consumo de Inventario Inicial por Almacén). El sistema debe calcular el proyectado periódicamente (diario/semanal/mensual) considerando el stock inicial real de cada almacén seleccionado. 
+
 RF-04 (Asignación Automática de Almacén en Recomendaciones). El sistema 
 debe generar las recomendaciones de órdenes de compra o producción 
 asignando automáticamente el almacén predeterminado definido en los datos 
 maestros del artículo o el almacén donde se originó la demanda. 
+
 RF-05 (Integración de Solicitudes de Traslado en MRP). El sistema debe incluir 
 las solicitudes de transferencia de inventario (Inventory Transfer Requests) 
 entre almacenes como fuente de demanda para el almacén origen y fuente de 
