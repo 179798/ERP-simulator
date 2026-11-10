@@ -12,7 +12,6 @@ MATERIALS = [
     {"code": "GPU001", "name": "Graphics Card RTX", "quantity": 1},
 ]
 
-
 def create_indexes(driver):
     queries = [
         """
@@ -32,6 +31,34 @@ def create_indexes(driver):
 
     print("Índices verificados para Product.code y Material.code.")
 
+def _create_and_remove_example(tx):
+    result = tx.run(
+        """
+        CREATE (example:TutorialExample {name: $name})
+        RETURN example.name AS name
+        """,
+        name="Ejemplo CREATE",
+    )
+
+    record = result.single()
+
+    tx.run(
+        """
+        MATCH (example:TutorialExample {name: $name})
+        DELETE example
+        """,
+        name=record["name"],
+    ).consume()
+
+    return record["name"]
+
+
+def demonstrate_create(driver):
+    with driver.session(database="neo4j") as session:
+        example_name = session.execute_write(_create_and_remove_example)
+
+    print(f"CREATE creó el nodo de ejemplo: {example_name}")
+    print("La transacción lo eliminó para no dejar datos de prueba.")
 
 def _write_bom_graph(tx, product_code, product_name, materials):
     query = """
@@ -115,6 +142,7 @@ def main():
         print("Conexión con Neo4j correcta.")
 
         create_indexes(driver)
+        demonstrate_create(driver)
 
         component_count, nodes_created, relationships_created = create_bom_graph(driver)
         print(f"Componentes relacionados: {component_count}")
