@@ -1,4 +1,3 @@
-```mermaid
 Requerimientos Warehouses ERP-simulator 
 #1. Definición de Requerimientos Funcionales 
 (RF - MRP y Almacén) 
@@ -82,7 +81,7 @@ forma consistente si la corrida vuelve a ejecutarse.
 Los cálculos e hipótesis de almacenes de un escenario en modo Simulación no 
 deben alterar ni modificar las tablas reales de stock físico ni las órdenes 
 activas en la base de datos.
-
+```mermaid
 flowchart TD
     classDef startEvent fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724;
     classDef endEvent fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24;
