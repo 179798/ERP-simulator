@@ -13,7 +13,27 @@ MATERIALS = [
 ]
 
 
-def create_bom_graph(driver):
+def create_indexes(driver):
+    queries = [
+        """
+        CREATE INDEX product_code_index IF NOT EXISTS
+        FOR (product:Product)
+        ON (product.code)
+        """,
+        """
+        CREATE INDEX material_code_index IF NOT EXISTS
+        FOR (material:Material)
+        ON (material.code)
+        """,
+    ]
+
+    for query in queries:
+        driver.execute_query(query, database_="neo4j")
+
+    print("Índices verificados para Product.code y Material.code.")
+
+
+def _write_bom_graph(tx, product_code, product_name, materials):
     query = """
     MERGE (product:Product {code: $product_code})
     SET product.name = $product_name
@@ -25,17 +45,35 @@ def create_bom_graph(driver):
     SET requires.quantity = item.quantity
     RETURN count(material) AS components
     """
-    records, summary, _ = driver.execute_query(
+
+    result = tx.run(
         query,
-        product_code="PC001",
-        product_name="Gaming PC",
-        materials=MATERIALS,
-        database_="neo4j",
+        product_code=product_code,
+        product_name=product_name,
+        materials=materials,
     )
-    return records[0]["components"], summary.counters
+
+    record = result.single()
+    summary = result.consume()
+
+    return (
+        record["components"],
+        summary.counters.nodes_created,
+        summary.counters.relationships_created,
+    )
 
 
-def get_required_materials(driver, product_code, order_quantity):
+def create_bom_graph(driver):
+    with driver.session(database="neo4j") as session:
+        return session.execute_write(
+            _write_bom_graph,
+            "PC001",
+            "Gaming PC",
+            MATERIALS,
+        )
+
+
+def _read_required_materials(tx, product_code, order_quantity):
     query = """
     MATCH (product:Product {code: $product_code})
           -[requires:REQUIRES]->
@@ -44,14 +82,23 @@ def get_required_materials(driver, product_code, order_quantity):
            requires.quantity * $order_quantity AS required
     ORDER BY material
     """
-    records, _, _ = driver.execute_query(
+
+    result = tx.run(
         query,
         product_code=product_code,
         order_quantity=order_quantity,
-        database_="neo4j",
     )
 
-    return [record.data() for record in records]
+    return [record.data() for record in result]
+
+
+def get_required_materials(driver, product_code, order_quantity):
+    with driver.session(database="neo4j") as session:
+        return session.execute_read(
+            _read_required_materials,
+            product_code,
+            order_quantity,
+        )
 
 
 def main():
@@ -62,22 +109,28 @@ def main():
     order_quantity = int(os.getenv("ORDER_QUANTITY", "30"))
 
     uri = f"bolt://{host}:{port}"
+
     with GraphDatabase.driver(uri, auth=(username, password)) as driver:
         driver.verify_connectivity()
         print("Conexión con Neo4j correcta.")
 
-        component_count, counters = create_bom_graph(driver)
+        create_indexes(driver)
+
+        component_count, nodes_created, relationships_created = create_bom_graph(driver)
         print(f"Componentes relacionados: {component_count}")
-        print(f"Nodos creados: {counters.nodes_created}")
-        print(f"Relaciones creadas: {counters.relationships_created}")
+        print(f"Nodos creados: {nodes_created}")
+        print(f"Relaciones creadas: {relationships_created}")
+
         requirements = get_required_materials(
             driver,
             product_code="PC001",
             order_quantity=order_quantity,
         )
+
         print(f"\nMateriales necesarios para {order_quantity} Gaming PC:")
         for item in requirements:
             print(f"{item['material']}: {item['required']}")
+
 
 if __name__ == "__main__":
     main()
