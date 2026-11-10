@@ -213,3 +213,4 @@ lowchart TD
     AuthCheck -- Sí --> ExecuteOp[Ejecutar Acción Crítica] --> LogAudit[Registrar Log Histórico <br/> Usuario, Timestamp, IP]
 
   end
+```
