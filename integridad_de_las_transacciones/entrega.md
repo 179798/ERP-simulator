@@ -159,7 +159,7 @@ diarios con los saldos acumulados en las tablas de resumen contable e inventario
 
 -----
 codigo:
-
+```mermaid
 lowchart TD
 
   Start([Inicio de Venta]) --> CheckConcurrency[Bloqueo Optimista/Pesimista & Validar Inventario]
