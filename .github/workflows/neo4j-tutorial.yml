@@ -1,8 +1,9 @@
 name: Neo4j Tutorial
-push:
+
+on:
+  push:
     branches:
       - feature/183435
-on:
   workflow_dispatch:
     inputs:
       order_quantity:
