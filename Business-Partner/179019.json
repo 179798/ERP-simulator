@@ -1,34 +1,35 @@
 {
   "standard": "ANSI/ISA-95",
-  "version": "Model-Based Manufacturing Operations Management (MOM) - Business Partner Domain",
+  "version": "Model-Based Manufacturing Operations Management (MOM) - Business Partner & Asset Domain",
   "metadata": {
-    "generated_at": "2026-11-10T20:26:00Z"
+    "generated_at": "2026-11-10T20:34:00Z"
   },
   "enterprise_model": {
-    "site": "Plant_Central_SLP",
+    "site": "TechAssembly_Plant_SLP",
     "area": "Enterprise_Master_Data_Management",
     "operations_definition": [
       {
         "module": "Business Partner Master Data Management (ISA-95 Party)",
-        "process_segment": "Partner Lifecycle, Roles and Financial Governance",
+        "process_segment": "Partner Lifecycle, Roles and Component Supplier Governance for TechAssembly",
         "events_and_messages": [
           {
             "event_id": "EVT-MOM-BP-001",
             "message_type": "BusinessPartnerCreateRequest",
             "direction": "CRM_ERP_to_MOM",
             "timestamp": "2026-11-10T08:00:00Z",
-            "description": "Creación inicial de un Socio Comercial (Business Partner) con soporte para roles múltiples (Proveedor / Cliente / Prospecto).[cite: 1]",
+            "description": "Creación inicial de un Socio Comercial proveedor de componentes electrónicos para TechAssembly con soporte para roles múltiples[cite: 1].",
             "payload": {
-              "BusinessPartnerID": "BP-PROV-5042",
-              "TaxID": "IND850101XYZ",
-              "LegalName": "Industrial Components S.A. de C.V.",
-              "CommercialName": "InduComponents",
+              "EnterpriseName": "TechAssembly",
+              "BusinessPartnerID": "BP-PROV-COMP-901",
+              "TaxID": "TAS951012ABC",
+              "LegalName": "Global Electronic Components S.A. de C.V.",
+              "CommercialName": "ElectroParts SLP",
               "PartnerType": "ORGANIZATION",
-              "Roles": ["VENDOR", "CUSTOMER"],
+              "Roles": ["VENDOR_COMPONENTS", "SUPPLIER_HARDWARE"],
               "Addresses": [
                 {
                   "AddressType": "FISCAL",
-                  "Street": "Av. Industrial 1200",
+                  "Street": "Parque Industrial Tres Naciones Zona Norte #400",
                   "City": "San Luis Potosi",
                   "State": "SLP",
                   "PostalCode": "78395",
@@ -36,7 +37,7 @@
                 },
                 {
                   "AddressType": "DELIVERY",
-                  "Street": "Bodega Norte 4",
+                  "Street": "TechAssembly Receiving Dock 02",
                   "City": "San Luis Potosi",
                   "State": "SLP",
                   "PostalCode": "78399",
@@ -45,20 +46,20 @@
               ],
               "ContactPersons": [
                 {
-                  "ContactID": "CNT-01",
-                  "Name": "Carlos Mendoza",
-                  "Role": "Sales Manager",
-                  "Email": "cmendoza@inducomponents.mx",
-                  "Phone": "+524441234567"
+                  "ContactID": "CNT-HW-01",
+                  "Name": "Ingrid Garza",
+                  "Role": "Key Account Manager - Hardware Components",
+                  "Email": "igarza@electroparts.mx",
+                  "Phone": "+524449876543"
                 }
               ],
               "FinancialData": {
-                "CreditLimit": 500000.00,
+                "CreditLimit": 1200000.00,
                 "Currency": "MXN",
-                "PaymentTerms": "30_DAYS",
+                "PaymentTerms": "45_DAYS",
                 "BankDetails": {
                   "BankName": "BBVA Mexico",
-                  "AccountCLABE": "012580001234567890"
+                  "AccountCLABE": "012580009876543210"
                 }
               }
             }
@@ -68,13 +69,14 @@
             "message_type": "BusinessPartnerRoleAssignment",
             "direction": "ERP_to_MOM",
             "timestamp": "2026-11-10T08:05:00Z",
-            "description": "Asignación o extensión de un rol comercial adicional a un Socio Comercial existente (ej. habilitar como Proveedor de MRO).[cite: 1]",
+            "description": "Asignación de rol comercial de proveedor de componentes críticos (CPUs, GPUs, RAM, Placas Base) para las computadoras de TechAssembly[cite: 1].",
             "payload": {
-              "BusinessPartnerID": "BP-PROV-5042",
-              "AddedRole": "VENDOR_MRO",
-              "PurchasingOrganization": "ORG-SLP-PURCH",
-              "AssignedCurrency": "MXN",
-              "Incoterm": "FOB"
+              "EnterpriseName": "TechAssembly",
+              "BusinessPartnerID": "BP-PROV-COMP-901",
+              "AddedRole": "VENDOR_CRITICAL_COMPONENTS",
+              "PurchasingOrganization": "ORG-TECH-SLP-PURCH",
+              "AssignedCurrency": "USD",
+              "Incoterm": "DDP"
             }
           },
           {
@@ -82,13 +84,14 @@
             "message_type": "BusinessPartnerStatusUpdate",
             "direction": "Compliance_to_MOM",
             "timestamp": "2026-11-10T07:30:00Z",
-            "description": "Actualización de estatus operativo o bloqueo centralizado de Socio Comercial por motivos de crédito o cumplimiento (Compliance).[cite: 1]",
+            "description": "Actualización de estatus operativo o validación de cumplimiento para recepción de lotes de componentes en TechAssembly[cite: 1].",
             "payload": {
-              "BusinessPartnerID": "BP-PROV-5042",
+              "EnterpriseName": "TechAssembly",
+              "BusinessPartnerID": "BP-PROV-COMP-901",
               "BlockStatus": false,
               "BlockReason": "NONE",
               "BlockedByModule": [],
-              "ModifiedBy": "USER-ADMIN-01"
+              "ModifiedBy": "179019"
             }
           },
           {
@@ -96,11 +99,12 @@
             "message_type": "BusinessPartnerFinancialRiskEvaluation",
             "direction": "Finance_System_to_MOM",
             "timestamp": "2026-11-10T09:15:00Z",
-            "description": "Evaluación de riesgo crediticio y reajuste de límites de crédito para el Socio Comercial.[cite: 1]",
+            "description": "Evaluación financiera y ajuste de línea de crédito para proveedor de componentes de computadoras[cite: 1].",
             "payload": {
-              "BusinessPartnerID": "BP-CLI-8810",
-              "PreviousCreditLimit": 300000.00,
-              "NewCreditLimit": 450000.00,
+              "EnterpriseName": "TechAssembly",
+              "BusinessPartnerID": "BP-PROV-COMP-901",
+              "PreviousCreditLimit": 1000000.00,
+              "NewCreditLimit": 1500000.00,
               "RiskScore": "LOW",
               "EvaluatedBy": "FIN-SYSTEM-AUTO"
             }
@@ -110,11 +114,12 @@
             "message_type": "BusinessPartnerSyncNotification",
             "direction": "MOM_to_Legacy_Systems",
             "timestamp": "2026-11-10T09:20:00Z",
-            "description": "Notificación de sincronización de datos maestros entre el modelo unificado de Business Partner y tablas heredadas (KNA1/LFA1).[cite: 1]",
+            "description": "Sincronización de catálogos de socios comerciales con sistemas ERP legados para la línea de ensamblaje de equipos TechAssembly[cite: 1].",
             "payload": {
-              "BusinessPartnerID": "BP-PROV-5042",
-              "LegacyCustomerMapping": "CUS-LEGACY-9012",
-              "LegacyVendorMapping": "VEN-LEGACY-4411",
+              "EnterpriseName": "TechAssembly",
+              "BusinessPartnerID": "BP-PROV-COMP-901",
+              "LegacyCustomerMapping": "CUS-LEGACY-TECH-01",
+              "LegacyVendorMapping": "VEN-LEGACY-COMP-44",
               "SyncStatus": "SUCCESS"
             }
           }
