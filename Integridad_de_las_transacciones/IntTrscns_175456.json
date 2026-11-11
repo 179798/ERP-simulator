@@ -1,0 +1,260 @@
+{
+  "modelo": "Eventos que detonan el area de integridad de las transacciones",
+  "estandar_referencia": "ISA-95 / IEC 62264 (Partes 1, 2, 3 y 5 - B2MML)",
+  "convenciones": {
+    "propiedades_integridad": ["Atomicidad", "Consistencia", "Aislamiento", "Durabilidad", "Trazabilidad", "No repudio"],
+    "transacciones_B2MML": ["Get", "Process", "Change", "Cancel", "Respond", "Show", "Sync"],
+    "formato_id_evento": "EV-<nivel>-<consecutivo>"
+  },
+  "jerarquia": {
+    "nivel_4_planeacion_de_negocio_ERP": {
+      "descripcion": "Planeacion, finanzas, inventarios, compras y ventas",
+      "categorias": {
+        "ordenes_y_programacion": [
+          {
+            "id": "EV-L4-001",
+            "evento": "Creacion de orden de produccion",
+            "objeto_ISA95": "Production Schedule",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Atomicidad", "Consistencia"],
+            "control": "Validar maestro de materiales, BOM y ruta antes de confirmar; commit unico",
+            "resultado_esperado": "Orden completa o rechazada, nunca parcial"
+          },
+          {
+            "id": "EV-L4-002",
+            "evento": "Modificacion de orden en ejecucion",
+            "objeto_ISA95": "Production Schedule",
+            "transaccion_B2MML": "Change",
+            "propiedad_integridad": ["Consistencia", "Aislamiento"],
+            "control": "Bloqueo de registro y control de versiones; notificar a MES",
+            "resultado_esperado": "Sin cambios concurrentes contradictorios"
+          },
+          {
+            "id": "EV-L4-003",
+            "evento": "Cancelacion de orden con consumos registrados",
+            "objeto_ISA95": "Production Schedule / Production Performance",
+            "transaccion_B2MML": "Cancel",
+            "propiedad_integridad": ["Atomicidad", "Trazabilidad"],
+            "control": "Reversa compensatoria de inventario y costos",
+            "resultado_esperado": "Saldos contables e inventario cuadrados"
+          }
+        ],
+        "datos_maestros": [
+          {
+            "id": "EV-L4-004",
+            "evento": "Cambio en BOM, receta o maestro de materiales",
+            "objeto_ISA95": "Material Definition / Process Segment",
+            "transaccion_B2MML": "Sync",
+            "propiedad_integridad": ["Consistencia", "No repudio"],
+            "control": "Flujo de aprobacion, vigencias y bitacora de auditoria",
+            "resultado_esperado": "ERP y MES operan con la misma version"
+          }
+        ],
+        "contabilizacion": [
+          {
+            "id": "EV-L4-005",
+            "evento": "Recepcion de reporte de produccion y contabilizacion",
+            "objeto_ISA95": "Production Performance",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Atomicidad", "Durabilidad"],
+            "control": "Asiento contable e inventario en una sola transaccion",
+            "resultado_esperado": "Costos reales alineados con consumos reportados"
+          }
+        ]
+      }
+    },
+    "nivel_3_operaciones_de_manufactura_MES": {
+      "descripcion": "Despacho, ejecucion, recoleccion de datos y trazabilidad",
+      "categorias": {
+        "ejecucion_de_produccion": [
+          {
+            "id": "EV-L3-001",
+            "evento": "Despacho de orden a centro de trabajo",
+            "objeto_ISA95": "Production Request / Work Center",
+            "transaccion_B2MML": "Get / Respond",
+            "propiedad_integridad": ["Consistencia"],
+            "control": "Confirmar disponibilidad de equipo, personal y material",
+            "resultado_esperado": "Orden despachada una sola vez"
+          },
+          {
+            "id": "EV-L3-002",
+            "evento": "Inicio o fin de operacion",
+            "objeto_ISA95": "Production Response",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Trazabilidad", "Consistencia"],
+            "control": "Secuencia valida de estados y sello de tiempo",
+            "resultado_esperado": "Estados sin saltos ni duplicados"
+          }
+        ],
+        "materiales_y_trazabilidad": [
+          {
+            "id": "EV-L3-003",
+            "evento": "Consumo de material por lote",
+            "objeto_ISA95": "Material Lot / Material Sublot",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Atomicidad", "Trazabilidad"],
+            "control": "Descontar lote y vincular a orden en una transaccion",
+            "resultado_esperado": "Genealogia de lote completa"
+          },
+          {
+            "id": "EV-L3-004",
+            "evento": "Reporte de produccion terminada o scrap",
+            "objeto_ISA95": "Production Performance",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Consistencia", "Durabilidad"],
+            "control": "Conciliar cantidades contra consumos y conteos",
+            "resultado_esperado": "Balance de materiales sin diferencias"
+          }
+        ],
+        "calidad_y_equipo": [
+          {
+            "id": "EV-L3-005",
+            "evento": "Resultado de inspeccion de calidad",
+            "objeto_ISA95": "Test Result / Material Lot",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["No repudio", "Trazabilidad"],
+            "control": "Firma electronica y bloqueo de lote no conforme",
+            "resultado_esperado": "Lote liberado o bloqueado en ERP y MES"
+          },
+          {
+            "id": "EV-L3-006",
+            "evento": "Paro de equipo no planeado",
+            "objeto_ISA95": "Equipment Performance",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Trazabilidad"],
+            "control": "Registrar causa, duracion y orden afectada",
+            "resultado_esperado": "Tiempo perdido asignado a la orden correcta"
+          }
+        ]
+      }
+    },
+    "nivel_2_supervision_y_control": {
+      "descripcion": "SCADA, HMI y PLC",
+      "categorias": {
+        "control_de_proceso": [
+          {
+            "id": "EV-L2-001",
+            "evento": "Descarga de receta o cambio de setpoint",
+            "objeto_ISA95": "Process Segment Parameter",
+            "transaccion_B2MML": "Change",
+            "propiedad_integridad": ["Consistencia", "No repudio"],
+            "control": "Validar version aprobada y registrar usuario",
+            "resultado_esperado": "Parametros ejecutados igual a los autorizados"
+          },
+          {
+            "id": "EV-L2-002",
+            "evento": "Perdida de comunicacion PLC-MES",
+            "objeto_ISA95": "Production Data Collection",
+            "transaccion_B2MML": "Sync",
+            "propiedad_integridad": ["Durabilidad", "Consistencia"],
+            "control": "Buffer local (store and forward) y reenvio ordenado",
+            "resultado_esperado": "Sin perdida ni duplicado de datos"
+          },
+          {
+            "id": "EV-L2-003",
+            "evento": "Alarma critica de proceso",
+            "objeto_ISA95": "Equipment / Alarm Event",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Trazabilidad"],
+            "control": "Registro con sello de tiempo sincronizado",
+            "resultado_esperado": "Alarma vinculada a lote y orden"
+          }
+        ]
+      }
+    },
+    "nivel_1_sensores_y_actuadores": {
+      "descripcion": "Instrumentacion y conteos",
+      "categorias": {
+        "captura_de_datos": [
+          {
+            "id": "EV-L1-001",
+            "evento": "Lectura fuera de rango o duplicada",
+            "objeto_ISA95": "Sensor Reading",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Consistencia"],
+            "control": "Validacion de rango y filtro de duplicados",
+            "resultado_esperado": "Solo lecturas validas llegan a MES"
+          },
+          {
+            "id": "EV-L1-002",
+            "evento": "Conteo de pieza producida",
+            "objeto_ISA95": "Production Count",
+            "transaccion_B2MML": "Process",
+            "propiedad_integridad": ["Atomicidad", "Consistencia"],
+            "control": "Contador monotono con deteccion de reinicio",
+            "resultado_esperado": "Cantidad producida confiable"
+          }
+        ]
+      }
+    },
+    "nivel_0_proceso_fisico": {
+      "descripcion": "Proceso de produccion real",
+      "categorias": {
+        "movimiento_fisico": [
+          {
+            "id": "EV-L0-001",
+            "evento": "Movimiento fisico de material sin transaccion registrada",
+            "objeto_ISA95": "Material Lot",
+            "transaccion_B2MML": "Sync",
+            "propiedad_integridad": ["Consistencia", "Trazabilidad"],
+            "control": "Conteo ciclico y escaneo obligatorio en cada movimiento",
+            "resultado_esperado": "Inventario fisico igual al del sistema"
+          }
+        ]
+      }
+    },
+    "transversales_integracion_ERP_MES": {
+      "descripcion": "Eventos que cruzan niveles y afectan la integridad de extremo a extremo",
+      "categorias": {
+        "mensajeria_B2MML": [
+          {
+            "id": "EV-X-001",
+            "evento": "Mensaje duplicado",
+            "propiedad_integridad": ["Consistencia"],
+            "control": "Idempotencia con ID unico de mensaje",
+            "resultado_esperado": "El duplicado se ignora sin efecto"
+          },
+          {
+            "id": "EV-X-002",
+            "evento": "Mensaje fuera de orden",
+            "propiedad_integridad": ["Consistencia", "Aislamiento"],
+            "control": "Numero de secuencia y cola ordenada",
+            "resultado_esperado": "Se procesa en la secuencia correcta"
+          },
+          {
+            "id": "EV-X-003",
+            "evento": "Timeout o falla de la interfaz",
+            "propiedad_integridad": ["Atomicidad", "Durabilidad"],
+            "control": "Reintentos, rollback o transaccion compensatoria",
+            "resultado_esperado": "Sin estados a medias entre ERP y MES"
+          }
+        ],
+        "seguridad_y_auditoria": [
+          {
+            "id": "EV-X-004",
+            "evento": "Acceso o modificacion no autorizada de datos",
+            "propiedad_integridad": ["No repudio", "Trazabilidad"],
+            "control": "Roles, segregacion de funciones y bitacora inmutable",
+            "resultado_esperado": "Todo cambio atribuible a un usuario"
+          },
+          {
+            "id": "EV-X-005",
+            "evento": "Desincronizacion de relojes entre sistemas",
+            "propiedad_integridad": ["Trazabilidad", "Consistencia"],
+            "control": "Sincronizacion NTP y validacion de sellos de tiempo",
+            "resultado_esperado": "Cronologia de eventos confiable"
+          }
+        ],
+        "conciliacion": [
+          {
+            "id": "EV-X-006",
+            "evento": "Cierre de turno o periodo con diferencias ERP vs MES",
+            "propiedad_integridad": ["Consistencia", "Durabilidad"],
+            "control": "Conciliacion automatica y ajustes autorizados",
+            "resultado_esperado": "Diferencias explicadas y documentadas"
+          }
+        ]
+      }
+    }
+  }
+}
