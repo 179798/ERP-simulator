@@ -1,5 +1,4 @@
 ```mermaid
-
 flowchart TD
     %% Definición de estilos estándar BPMN
     classDef startEvent fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#000;
