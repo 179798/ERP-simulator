@@ -1,0 +1,125 @@
+{
+  "standard": "ANSI/ISA-95",
+  "version": "Model-Based Manufacturing Operations Management (MOM) - Business Partner Domain",
+  "metadata": {
+    "generated_at": "2026-11-10T20:26:00Z"
+  },
+  "enterprise_model": {
+    "site": "Plant_Central_SLP",
+    "area": "Enterprise_Master_Data_Management",
+    "operations_definition": [
+      {
+        "module": "Business Partner Master Data Management (ISA-95 Party)",
+        "process_segment": "Partner Lifecycle, Roles and Financial Governance",
+        "events_and_messages": [
+          {
+            "event_id": "EVT-MOM-BP-001",
+            "message_type": "BusinessPartnerCreateRequest",
+            "direction": "CRM_ERP_to_MOM",
+            "timestamp": "2026-11-10T08:00:00Z",
+            "description": "Creación inicial de un Socio Comercial (Business Partner) con soporte para roles múltiples (Proveedor / Cliente / Prospecto).[cite: 1]",
+            "payload": {
+              "BusinessPartnerID": "BP-PROV-5042",
+              "TaxID": "IND850101XYZ",
+              "LegalName": "Industrial Components S.A. de C.V.",
+              "CommercialName": "InduComponents",
+              "PartnerType": "ORGANIZATION",
+              "Roles": ["VENDOR", "CUSTOMER"],
+              "Addresses": [
+                {
+                  "AddressType": "FISCAL",
+                  "Street": "Av. Industrial 1200",
+                  "City": "San Luis Potosi",
+                  "State": "SLP",
+                  "PostalCode": "78395",
+                  "Country": "MX"
+                },
+                {
+                  "AddressType": "DELIVERY",
+                  "Street": "Bodega Norte 4",
+                  "City": "San Luis Potosi",
+                  "State": "SLP",
+                  "PostalCode": "78399",
+                  "Country": "MX"
+                }
+              ],
+              "ContactPersons": [
+                {
+                  "ContactID": "CNT-01",
+                  "Name": "Carlos Mendoza",
+                  "Role": "Sales Manager",
+                  "Email": "cmendoza@inducomponents.mx",
+                  "Phone": "+524441234567"
+                }
+              ],
+              "FinancialData": {
+                "CreditLimit": 500000.00,
+                "Currency": "MXN",
+                "PaymentTerms": "30_DAYS",
+                "BankDetails": {
+                  "BankName": "BBVA Mexico",
+                  "AccountCLABE": "012580001234567890"
+                }
+              }
+            }
+          },
+          {
+            "event_id": "EVT-MOM-BP-002",
+            "message_type": "BusinessPartnerRoleAssignment",
+            "direction": "ERP_to_MOM",
+            "timestamp": "2026-11-10T08:05:00Z",
+            "description": "Asignación o extensión de un rol comercial adicional a un Socio Comercial existente (ej. habilitar como Proveedor de MRO).[cite: 1]",
+            "payload": {
+              "BusinessPartnerID": "BP-PROV-5042",
+              "AddedRole": "VENDOR_MRO",
+              "PurchasingOrganization": "ORG-SLP-PURCH",
+              "AssignedCurrency": "MXN",
+              "Incoterm": "FOB"
+            }
+          },
+          {
+            "event_id": "EVT-MOM-BP-003",
+            "message_type": "BusinessPartnerStatusUpdate",
+            "direction": "Compliance_to_MOM",
+            "timestamp": "2026-11-10T07:30:00Z",
+            "description": "Actualización de estatus operativo o bloqueo centralizado de Socio Comercial por motivos de crédito o cumplimiento (Compliance).[cite: 1]",
+            "payload": {
+              "BusinessPartnerID": "BP-PROV-5042",
+              "BlockStatus": false,
+              "BlockReason": "NONE",
+              "BlockedByModule": [],
+              "ModifiedBy": "USER-ADMIN-01"
+            }
+          },
+          {
+            "event_id": "EVT-MOM-BP-004",
+            "message_type": "BusinessPartnerFinancialRiskEvaluation",
+            "direction": "Finance_System_to_MOM",
+            "timestamp": "2026-11-10T09:15:00Z",
+            "description": "Evaluación de riesgo crediticio y reajuste de límites de crédito para el Socio Comercial.[cite: 1]",
+            "payload": {
+              "BusinessPartnerID": "BP-CLI-8810",
+              "PreviousCreditLimit": 300000.00,
+              "NewCreditLimit": 450000.00,
+              "RiskScore": "LOW",
+              "EvaluatedBy": "FIN-SYSTEM-AUTO"
+            }
+          },
+          {
+            "event_id": "EVT-MOM-BP-005",
+            "message_type": "BusinessPartnerSyncNotification",
+            "direction": "MOM_to_Legacy_Systems",
+            "timestamp": "2026-11-10T09:20:00Z",
+            "description": "Notificación de sincronización de datos maestros entre el modelo unificado de Business Partner y tablas heredadas (KNA1/LFA1).[cite: 1]",
+            "payload": {
+              "BusinessPartnerID": "BP-PROV-5042",
+              "LegacyCustomerMapping": "CUS-LEGACY-9012",
+              "LegacyVendorMapping": "VEN-LEGACY-4411",
+              "SyncStatus": "SUCCESS"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
