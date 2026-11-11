@@ -30,7 +30,7 @@ jobs:
       NEO4J_PORT: 7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: password
-      ORDER_QUANTITY: ${{ github.event.inputs.order_quantity }}
+      ORDER_QUANTITY: ${{ github.event.inputs.order_quantity || '30' }}
 
     steps:
       - name: Descargar el repositorio
