@@ -57,47 +57,46 @@ flowchart TD
 
     %% CONEXIONES DEL FLUJO
     E_Inicio --> G_Candado
-    G_Candado -- Sí --> E_FinCandado
-    G_Candado -- No (Bloquea) --> T_BOM
+    G_Candado -->|"Sí"| E_FinCandado
+    G_Candado -->|"No (Bloquea)"| T_BOM
     T_BOM --> T_CalculoNeto
     T_CalculoNeto --> G_CambioDemanda
-    G_CambioDemanda -- Sí --> T_AlertaComprador
-    G_CambioDemanda -- No --> G_TipoOrden
+    G_CambioDemanda -->|"Sí"| T_AlertaComprador
+    G_CambioDemanda -->|"No"| G_TipoOrden
     T_AlertaComprador --> G_TipoOrden
 
     %% Flujo hacia Compras
-    G_TipoOrden -- Faltan Materias Primas --> T_CrearOC
+    G_TipoOrden -->|"Faltan Materias Primas"| T_CrearOC
     T_CrearOC --> G_Proveedor
-    G_Proveedor -- No --> E_RechazoProv
-    G_Proveedor -- Sí --> T_AjusteLote
+    G_Proveedor -->|"No"| E_RechazoProv
+    G_Proveedor -->|"Sí"| T_AjusteLote
     T_AjusteLote --> G_AprobacionOC
-    G_AprobacionOC -- No / Espera --> T_CrearOC
-    G_AprobacionOC -- Sí --> T_EnviarOC
+    G_AprobacionOC -->|"No / Espera"| T_CrearOC
+    G_AprobacionOC -->|"Sí"| T_EnviarOC
 
     %% Flujo hacia Almacén
     T_EnviarOC --> T_RecibirOC
     T_RecibirOC --> G_Tolerancia
-    G_Tolerancia -- No (Excede) --> E_RechazoTol
-    G_Tolerancia -- Sí --> T_ActualizarKardex
+    G_Tolerancia -->|"No (Excede)"| E_RechazoTol
+    G_Tolerancia -->|"Sí"| T_ActualizarKardex
     T_ActualizarKardex --> G_RecepcionTotal
-    G_RecepcionTotal -- No --> T_OCParcial
+    G_RecepcionTotal -->|"No"| T_OCParcial
     T_OCParcial -.-> T_RecibirOC
-    G_RecepcionTotal -- Sí --> T_OCTotal
+    G_RecepcionTotal -->|"Sí"| T_OCTotal
 
     %% Flujo hacia Producción
-    G_TipoOrden -- Demanda Producto Terminado --> G_ValidaBOM
-    G_ValidaBOM -- No --> E_ErrorBOM
-    G_ValidaBOM -- Sí --> T_CrearOP
+    G_TipoOrden -->|"Demanda Producto Terminado"| G_ValidaBOM
+    G_ValidaBOM -->|"No"| E_ErrorBOM
+    G_ValidaBOM -->|"Sí"| T_CrearOP
     T_CrearOP --> G_StockCritico
-    T_ActualizarKardex -. Surte Stock .-> G_StockCritico
-    G_StockCritico -- No (Bloquea y Espera) --> T_CrearOC
-    G_StockCritico -- Sí --> T_LiberarOP
+    T_ActualizarKardex -.->|"Surte Stock"| G_StockCritico
+    G_StockCritico -->|"No (Bloquea y Espera)"| T_CrearOC
+    G_StockCritico -->|"Sí"| T_LiberarOP
     T_LiberarOP --> T_Consumo
     T_Consumo --> G_CierreValido
-    G_CierreValido -- No --> T_Consumo
-    G_CierreValido -- Sí --> T_CierreACID
+    G_CierreValido -->|"No"| T_Consumo
+    G_CierreValido -->|"Sí"| T_CierreACID
     T_CierreACID --> E_FinProceso
-
 ```
 
 Documento de Especificación para 
