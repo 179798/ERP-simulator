@@ -14,7 +14,7 @@ RETURN t.name AS Team, COUNT(m) AS MatchesWon
 ORDER BY MatchesWon DESC
 LIMIT 1
 """
-records, summary, keys = driver.execute_query(query, database_="30ab3c08")
+records, summary, keys = driver.execute_query(query, database_="neo4j")
 for record in records:
     print(record.data())
 query = """
@@ -24,7 +24,7 @@ ORDER BY MatchesWon DESC
 LIMIT $limit
 """
 records, summary, keys = driver.execute_query(
-   query, database_="30ab3c08", tournament="UEFA Euro", limit=3,
+   query, database_="neo4j", tournament="UEFA Euro", limit=3,
 )
 for record in records:
    print(record.data())
@@ -41,7 +41,7 @@ def add_new_coach(driver, coach_name, team_name, start_date, end_date):
     """
     result = driver.execute_query(
         query,
-        database_="30ab3c08",
+        database_="neo4j",
         coach_name=coach_name,
         team_name=team_name,
         start_date=start_date,
@@ -65,7 +65,7 @@ def top_goal_scorers(tx, tournament, limit):
     result = tx.run(query, tournament=tournament, limit=limit)
     return [record.data() for record in result]
 
-with driver.session(database="30ab3c08") as session:
+with driver.session(database="neo4j") as session:
     result = session.execute_read(top_goal_scorers, "FIFA World Cup", 5)
     for record in result:
         print(record)
