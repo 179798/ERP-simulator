@@ -1,0 +1,35 @@
+name: Neo4j Tutorial
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verificar-conexion:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install neo4j python-dotenv
+
+      - name: Probar conexion a Neo4j Aura
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
+        run: |
+          python -c "
+          import os
+          from neo4j import GraphDatabase
+          d = GraphDatabase.driver(os.environ['NEO4J_URI'], auth=(os.environ['NEO4J_USERNAME'], os.environ['NEO4J_PASSWORD']))
+          d.verify_connectivity()
+          print('Connection successful!')
+          d.close()
+          "
