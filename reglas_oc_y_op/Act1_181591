@@ -1,4 +1,4 @@
-```mermaid
+
 flowchart TD
     %% Definición de estilos estándar BPMN
     classDef startEvent fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#000;
@@ -96,7 +96,7 @@ flowchart TD
     G_CierreValido -->|"No"| T_Consumo
     G_CierreValido -->|"Sí"| T_CierreACID
     T_CierreACID --> E_FinProceso
-```
+
 
 Documento de Especificación para 
 Desarrollo ERP: Módulo MRP (Órdenes 
