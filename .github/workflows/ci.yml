@@ -98,9 +98,6 @@ jobs:
       - name: Load Master Data
         run: |
           python src/seed_data.py
-      - name: Run Neo4j tutorial exercise
-        run: |
-          python src/neo4j_tutorial_erp.py
 
       - name: Run MRP Validation
         run: |
