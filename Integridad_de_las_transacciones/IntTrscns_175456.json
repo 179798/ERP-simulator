@@ -1,6 +1,6 @@
 {
   "modelo": "Eventos sobre el area de integridad de las transacciones",
-  "estandar_referencia": "ISA-95 / IEC 62264 (Partes 1, 2, 3 y 5 - B2MML)",
+  "estandar_referencia": "ISA-95 (Partes 1, 2, 3 y 5 - B2MML)",
   "convenciones": {
     "propiedades_integridad": ["Atomicidad", "Consistencia", "Aislamiento", "Durabilidad", "Trazabilidad", "No repudio"],
     "transacciones_B2MML": ["Get", "Process", "Change", "Cancel", "Respond", "Show", "Sync"],
