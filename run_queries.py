@@ -3,13 +3,13 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from neo4j.time import DateTime
 
-# Cargar variables de entorno
+
 load_dotenv()
 URI = os.getenv("NEO4J_URI") or os.getenv("NEO4J_CONNECTION_URI")
 USERNAME = os.getenv("NEO4J_USERNAME") or os.getenv("NEO4J_USER")
 PASSWORD = os.getenv("NEO4J_PASSWORD")
 
-# Crear el driver de conexión
+
 driver = GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
 
 print("=== 1. EQUIPO CON MÁS PARTIDOS GANADOS EN MUNDIALES ===")
@@ -19,7 +19,7 @@ RETURN t.name AS Team, COUNT(m) AS MatchesWon
 ORDER BY MatchesWon DESC
 LIMIT 1
 """
-records, summary, keys = driver.execute_query(query1, database_="neo4j")
+records, summary, keys = driver.execute_query(query1)
 for record in records:
     print(record.data())
 
@@ -31,7 +31,7 @@ ORDER BY MatchesWon DESC
 LIMIT $limit
 """
 records, summary, keys = driver.execute_query(
-    query2, database_="neo4j", tournament="UEFA Euro", limit=3
+    query2, tournament="UEFA Euro", limit=3
 )
 for record in records:
     print(record.data())
@@ -47,7 +47,6 @@ def add_new_coach(driver, coach_name, team_name, start_date, end_date):
     """
     result = driver.execute_query(
         query,
-        database_="neo4j",
         coach_name=coach_name,
         team_name=team_name,
         start_date=start_date,
