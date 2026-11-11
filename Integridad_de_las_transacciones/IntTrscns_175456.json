@@ -1,9 +1,24 @@
 {
-  "modelo": "Eventos sobre el area de integridad de las transacciones",
+  "modelo": "Eventos consecuentes del area de integridad de las transacciones",
   "estandar_referencia": "ISA-95 (Partes 1, 2, 3 y 5 - B2MML)",
   "convenciones": {
-    "propiedades_integridad": ["Atomicidad", "Consistencia", "Aislamiento", "Durabilidad", "Trazabilidad", "No repudio"],
-    "transacciones_B2MML": ["Get", "Process", "Change", "Cancel", "Respond", "Show", "Sync"],
+    "propiedades_integridad": [
+      "Atomicidad",
+      "Consistencia",
+      "Aislamiento",
+      "Durabilidad",
+      "Trazabilidad",
+      "No repudio"
+    ],
+    "transacciones_B2MML": [
+      "Get",
+      "Process",
+      "Change",
+      "Cancel",
+      "Respond",
+      "Show",
+      "Sync"
+    ],
     "formato_id_evento": "EV-<nivel>-<consecutivo>"
   },
   "jerarquia": {
@@ -16,27 +31,66 @@
             "evento": "Creacion de orden de produccion",
             "objeto_ISA95": "Production Schedule",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Atomicidad", "Consistencia"],
+            "propiedad_integridad": [
+              "Atomicidad",
+              "Consistencia"
+            ],
             "control": "Validar maestro de materiales, BOM y ruta antes de confirmar; commit unico",
-            "resultado_esperado": "Orden completa o rechazada, nunca parcial"
+            "resultado_esperado": "Orden completa o rechazada, nunca parcial",
+            "sincronizacion": {
+              "fuente_reloj": "ERP",
+              "timestamp_origen": "2026-11-10T08:00:07.137Z",
+              "timestamp_recepcion": "2026-11-10T08:00:07.457Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:07.637Z",
+              "latencia_ms": 320,
+              "tolerancia_desfase_ms": 1000,
+              "secuencia": 1,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L4-002",
             "evento": "Modificacion de orden en ejecucion",
             "objeto_ISA95": "Production Schedule",
             "transaccion_B2MML": "Change",
-            "propiedad_integridad": ["Consistencia", "Aislamiento"],
+            "propiedad_integridad": [
+              "Consistencia",
+              "Aislamiento"
+            ],
             "control": "Bloqueo de registro y control de versiones; notificar a MES",
-            "resultado_esperado": "Sin cambios concurrentes contradictorios"
+            "resultado_esperado": "Sin cambios concurrentes contradictorios",
+            "sincronizacion": {
+              "fuente_reloj": "ERP",
+              "timestamp_origen": "2026-11-10T08:00:14.274Z",
+              "timestamp_recepcion": "2026-11-10T08:00:14.594Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:14.774Z",
+              "latencia_ms": 320,
+              "tolerancia_desfase_ms": 1000,
+              "secuencia": 2,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L4-003",
             "evento": "Cancelacion de orden con consumos registrados",
             "objeto_ISA95": "Production Schedule / Production Performance",
             "transaccion_B2MML": "Cancel",
-            "propiedad_integridad": ["Atomicidad", "Trazabilidad"],
+            "propiedad_integridad": [
+              "Atomicidad",
+              "Trazabilidad"
+            ],
             "control": "Reversa compensatoria de inventario y costos",
-            "resultado_esperado": "Saldos contables e inventario cuadrados"
+            "resultado_esperado": "Saldos contables e inventario cuadrados",
+            "sincronizacion": {
+              "fuente_reloj": "ERP",
+              "timestamp_origen": "2026-11-10T08:00:21.411Z",
+              "timestamp_recepcion": "2026-11-10T08:00:21.731Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:21.911Z",
+              "latencia_ms": 320,
+              "tolerancia_desfase_ms": 1000,
+              "secuencia": 3,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ],
         "datos_maestros": [
@@ -45,9 +99,22 @@
             "evento": "Cambio en BOM, receta o maestro de materiales",
             "objeto_ISA95": "Material Definition / Process Segment",
             "transaccion_B2MML": "Sync",
-            "propiedad_integridad": ["Consistencia", "No repudio"],
+            "propiedad_integridad": [
+              "Consistencia",
+              "No repudio"
+            ],
             "control": "Flujo de aprobacion, vigencias y bitacora de auditoria",
-            "resultado_esperado": "ERP y MES operan con la misma version"
+            "resultado_esperado": "ERP y MES operan con la misma version",
+            "sincronizacion": {
+              "fuente_reloj": "ERP",
+              "timestamp_origen": "2026-11-10T08:00:28.548Z",
+              "timestamp_recepcion": "2026-11-10T08:00:28.868Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:29.048Z",
+              "latencia_ms": 320,
+              "tolerancia_desfase_ms": 1000,
+              "secuencia": 4,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ],
         "contabilizacion": [
@@ -56,9 +123,22 @@
             "evento": "Recepcion de reporte de produccion y contabilizacion",
             "objeto_ISA95": "Production Performance",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Atomicidad", "Durabilidad"],
+            "propiedad_integridad": [
+              "Atomicidad",
+              "Durabilidad"
+            ],
             "control": "Asiento contable e inventario en una sola transaccion",
-            "resultado_esperado": "Costos reales alineados con consumos reportados"
+            "resultado_esperado": "Costos reales alineados con consumos reportados",
+            "sincronizacion": {
+              "fuente_reloj": "ERP",
+              "timestamp_origen": "2026-11-10T08:00:35.685Z",
+              "timestamp_recepcion": "2026-11-10T08:00:36.005Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:36.185Z",
+              "latencia_ms": 320,
+              "tolerancia_desfase_ms": 1000,
+              "secuencia": 5,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ]
       }
@@ -72,18 +152,43 @@
             "evento": "Despacho de orden a centro de trabajo",
             "objeto_ISA95": "Production Request / Work Center",
             "transaccion_B2MML": "Get / Respond",
-            "propiedad_integridad": ["Consistencia"],
+            "propiedad_integridad": [
+              "Consistencia"
+            ],
             "control": "Confirmar disponibilidad de equipo, personal y material",
-            "resultado_esperado": "Orden despachada una sola vez"
+            "resultado_esperado": "Orden despachada una sola vez",
+            "sincronizacion": {
+              "fuente_reloj": "MES",
+              "timestamp_origen": "2026-11-10T08:00:42.822Z",
+              "timestamp_recepcion": "2026-11-10T08:00:42.962Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:43.052Z",
+              "latencia_ms": 140,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 6,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L3-002",
             "evento": "Inicio o fin de operacion",
             "objeto_ISA95": "Production Response",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Trazabilidad", "Consistencia"],
+            "propiedad_integridad": [
+              "Trazabilidad",
+              "Consistencia"
+            ],
             "control": "Secuencia valida de estados y sello de tiempo",
-            "resultado_esperado": "Estados sin saltos ni duplicados"
+            "resultado_esperado": "Estados sin saltos ni duplicados",
+            "sincronizacion": {
+              "fuente_reloj": "MES",
+              "timestamp_origen": "2026-11-10T08:00:49.959Z",
+              "timestamp_recepcion": "2026-11-10T08:00:50.099Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:50.189Z",
+              "latencia_ms": 140,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 7,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ],
         "materiales_y_trazabilidad": [
@@ -92,18 +197,44 @@
             "evento": "Consumo de material por lote",
             "objeto_ISA95": "Material Lot / Material Sublot",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Atomicidad", "Trazabilidad"],
+            "propiedad_integridad": [
+              "Atomicidad",
+              "Trazabilidad"
+            ],
             "control": "Descontar lote y vincular a orden en una transaccion",
-            "resultado_esperado": "Genealogia de lote completa"
+            "resultado_esperado": "Genealogia de lote completa",
+            "sincronizacion": {
+              "fuente_reloj": "MES",
+              "timestamp_origen": "2026-11-10T08:00:57.096Z",
+              "timestamp_recepcion": "2026-11-10T08:00:57.236Z",
+              "timestamp_confirmacion": "2026-11-10T08:00:57.326Z",
+              "latencia_ms": 140,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 8,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L3-004",
             "evento": "Reporte de produccion terminada o scrap",
             "objeto_ISA95": "Production Performance",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Consistencia", "Durabilidad"],
+            "propiedad_integridad": [
+              "Consistencia",
+              "Durabilidad"
+            ],
             "control": "Conciliar cantidades contra consumos y conteos",
-            "resultado_esperado": "Balance de materiales sin diferencias"
+            "resultado_esperado": "Balance de materiales sin diferencias",
+            "sincronizacion": {
+              "fuente_reloj": "MES",
+              "timestamp_origen": "2026-11-10T08:01:04.233Z",
+              "timestamp_recepcion": "2026-11-10T08:01:04.373Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:04.463Z",
+              "latencia_ms": 140,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 9,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ],
         "calidad_y_equipo": [
@@ -112,18 +243,43 @@
             "evento": "Resultado de inspeccion de calidad",
             "objeto_ISA95": "Test Result / Material Lot",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["No repudio", "Trazabilidad"],
+            "propiedad_integridad": [
+              "No repudio",
+              "Trazabilidad"
+            ],
             "control": "Firma electronica y bloqueo de lote no conforme",
-            "resultado_esperado": "Lote liberado o bloqueado en ERP y MES"
+            "resultado_esperado": "Lote liberado o bloqueado en ERP y MES",
+            "sincronizacion": {
+              "fuente_reloj": "MES",
+              "timestamp_origen": "2026-11-10T08:01:11.370Z",
+              "timestamp_recepcion": "2026-11-10T08:01:11.510Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:11.600Z",
+              "latencia_ms": 140,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 10,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L3-006",
             "evento": "Paro de equipo no planeado",
             "objeto_ISA95": "Equipment Performance",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Trazabilidad"],
+            "propiedad_integridad": [
+              "Trazabilidad"
+            ],
             "control": "Registrar causa, duracion y orden afectada",
-            "resultado_esperado": "Tiempo perdido asignado a la orden correcta"
+            "resultado_esperado": "Tiempo perdido asignado a la orden correcta",
+            "sincronizacion": {
+              "fuente_reloj": "MES",
+              "timestamp_origen": "2026-11-10T08:01:18.507Z",
+              "timestamp_recepcion": "2026-11-10T08:01:18.647Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:18.737Z",
+              "latencia_ms": 140,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 11,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ]
       }
@@ -137,27 +293,65 @@
             "evento": "Descarga de receta o cambio de setpoint",
             "objeto_ISA95": "Process Segment Parameter",
             "transaccion_B2MML": "Change",
-            "propiedad_integridad": ["Consistencia", "No repudio"],
+            "propiedad_integridad": [
+              "Consistencia",
+              "No repudio"
+            ],
             "control": "Validar version aprobada y registrar usuario",
-            "resultado_esperado": "Parametros ejecutados igual a los autorizados"
+            "resultado_esperado": "Parametros ejecutados igual a los autorizados",
+            "sincronizacion": {
+              "fuente_reloj": "PLC/SCADA",
+              "timestamp_origen": "2026-11-10T08:01:25.644Z",
+              "timestamp_recepcion": "2026-11-10T08:01:25.669Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:25.684Z",
+              "latencia_ms": 25,
+              "tolerancia_desfase_ms": 50,
+              "secuencia": 12,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L2-002",
             "evento": "Perdida de comunicacion PLC-MES",
             "objeto_ISA95": "Production Data Collection",
             "transaccion_B2MML": "Sync",
-            "propiedad_integridad": ["Durabilidad", "Consistencia"],
+            "propiedad_integridad": [
+              "Durabilidad",
+              "Consistencia"
+            ],
             "control": "Buffer local (store and forward) y reenvio ordenado",
-            "resultado_esperado": "Sin perdida ni duplicado de datos"
+            "resultado_esperado": "Sin perdida ni duplicado de datos",
+            "sincronizacion": {
+              "fuente_reloj": "PLC/SCADA",
+              "timestamp_origen": "2026-11-10T08:01:32.781Z",
+              "timestamp_recepcion": "2026-11-10T08:01:32.806Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:32.821Z",
+              "latencia_ms": 25,
+              "tolerancia_desfase_ms": 50,
+              "secuencia": 13,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L2-003",
             "evento": "Alarma critica de proceso",
             "objeto_ISA95": "Equipment / Alarm Event",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Trazabilidad"],
+            "propiedad_integridad": [
+              "Trazabilidad"
+            ],
             "control": "Registro con sello de tiempo sincronizado",
-            "resultado_esperado": "Alarma vinculada a lote y orden"
+            "resultado_esperado": "Alarma vinculada a lote y orden",
+            "sincronizacion": {
+              "fuente_reloj": "PLC/SCADA",
+              "timestamp_origen": "2026-11-10T08:01:39.918Z",
+              "timestamp_recepcion": "2026-11-10T08:01:39.943Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:39.958Z",
+              "latencia_ms": 25,
+              "tolerancia_desfase_ms": 50,
+              "secuencia": 14,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ]
       }
@@ -171,18 +365,43 @@
             "evento": "Lectura fuera de rango o duplicada",
             "objeto_ISA95": "Sensor Reading",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Consistencia"],
+            "propiedad_integridad": [
+              "Consistencia"
+            ],
             "control": "Validacion de rango y filtro de duplicados",
-            "resultado_esperado": "Solo lecturas validas llegan a MES"
+            "resultado_esperado": "Solo lecturas validas llegan a MES",
+            "sincronizacion": {
+              "fuente_reloj": "Sensor/Contador",
+              "timestamp_origen": "2026-11-10T08:01:47.055Z",
+              "timestamp_recepcion": "2026-11-10T08:01:47.059Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:47.062Z",
+              "latencia_ms": 4,
+              "tolerancia_desfase_ms": 10,
+              "secuencia": 15,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-L1-002",
             "evento": "Conteo de pieza producida",
             "objeto_ISA95": "Production Count",
             "transaccion_B2MML": "Process",
-            "propiedad_integridad": ["Atomicidad", "Consistencia"],
+            "propiedad_integridad": [
+              "Atomicidad",
+              "Consistencia"
+            ],
             "control": "Contador monotono con deteccion de reinicio",
-            "resultado_esperado": "Cantidad producida confiable"
+            "resultado_esperado": "Cantidad producida confiable",
+            "sincronizacion": {
+              "fuente_reloj": "Sensor/Contador",
+              "timestamp_origen": "2026-11-10T08:01:54.192Z",
+              "timestamp_recepcion": "2026-11-10T08:01:54.196Z",
+              "timestamp_confirmacion": "2026-11-10T08:01:54.199Z",
+              "latencia_ms": 4,
+              "tolerancia_desfase_ms": 10,
+              "secuencia": 16,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ]
       }
@@ -196,9 +415,22 @@
             "evento": "Movimiento fisico de material sin transaccion registrada",
             "objeto_ISA95": "Material Lot",
             "transaccion_B2MML": "Sync",
-            "propiedad_integridad": ["Consistencia", "Trazabilidad"],
+            "propiedad_integridad": [
+              "Consistencia",
+              "Trazabilidad"
+            ],
             "control": "Conteo ciclico y escaneo obligatorio en cada movimiento",
-            "resultado_esperado": "Inventario fisico igual al del sistema"
+            "resultado_esperado": "Inventario fisico igual al del sistema",
+            "sincronizacion": {
+              "fuente_reloj": "Captura manual/escaner",
+              "timestamp_origen": "2026-11-10T08:02:01.329Z",
+              "timestamp_recepcion": "2026-11-10T08:02:01.929Z",
+              "timestamp_confirmacion": "2026-11-10T08:02:02.129Z",
+              "latencia_ms": 600,
+              "tolerancia_desfase_ms": 1000,
+              "secuencia": 17,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ]
       }
@@ -210,51 +442,157 @@
           {
             "id": "EV-X-001",
             "evento": "Mensaje duplicado",
-            "propiedad_integridad": ["Consistencia"],
+            "propiedad_integridad": [
+              "Consistencia"
+            ],
             "control": "Idempotencia con ID unico de mensaje",
-            "resultado_esperado": "El duplicado se ignora sin efecto"
+            "resultado_esperado": "El duplicado se ignora sin efecto",
+            "sincronizacion": {
+              "fuente_reloj": "Interfaz ERP-MES",
+              "timestamp_origen": "2026-11-10T08:02:08.466Z",
+              "timestamp_recepcion": "2026-11-10T08:02:08.676Z",
+              "timestamp_confirmacion": "2026-11-10T08:02:08.796Z",
+              "latencia_ms": 210,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 18,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-X-002",
             "evento": "Mensaje fuera de orden",
-            "propiedad_integridad": ["Consistencia", "Aislamiento"],
+            "propiedad_integridad": [
+              "Consistencia",
+              "Aislamiento"
+            ],
             "control": "Numero de secuencia y cola ordenada",
-            "resultado_esperado": "Se procesa en la secuencia correcta"
+            "resultado_esperado": "Se procesa en la secuencia correcta",
+            "sincronizacion": {
+              "fuente_reloj": "Interfaz ERP-MES",
+              "timestamp_origen": "2026-11-10T08:02:15.603Z",
+              "timestamp_recepcion": "2026-11-10T08:02:15.813Z",
+              "timestamp_confirmacion": "2026-11-10T08:02:15.933Z",
+              "latencia_ms": 210,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 19,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-X-003",
             "evento": "Timeout o falla de la interfaz",
-            "propiedad_integridad": ["Atomicidad", "Durabilidad"],
+            "propiedad_integridad": [
+              "Atomicidad",
+              "Durabilidad"
+            ],
             "control": "Reintentos, rollback o transaccion compensatoria",
-            "resultado_esperado": "Sin estados a medias entre ERP y MES"
+            "resultado_esperado": "Sin estados a medias entre ERP y MES",
+            "sincronizacion": {
+              "fuente_reloj": "Interfaz ERP-MES",
+              "timestamp_origen": "2026-11-10T08:02:22.740Z",
+              "timestamp_recepcion": "2026-11-10T08:02:22.950Z",
+              "timestamp_confirmacion": "2026-11-10T08:02:23.070Z",
+              "latencia_ms": 210,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 20,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ],
         "seguridad_y_auditoria": [
           {
             "id": "EV-X-004",
             "evento": "Acceso o modificacion no autorizada de datos",
-            "propiedad_integridad": ["No repudio", "Trazabilidad"],
+            "propiedad_integridad": [
+              "No repudio",
+              "Trazabilidad"
+            ],
             "control": "Roles, segregacion de funciones y bitacora inmutable",
-            "resultado_esperado": "Todo cambio atribuible a un usuario"
+            "resultado_esperado": "Todo cambio atribuible a un usuario",
+            "sincronizacion": {
+              "fuente_reloj": "Interfaz ERP-MES",
+              "timestamp_origen": "2026-11-10T08:02:29.877Z",
+              "timestamp_recepcion": "2026-11-10T08:02:30.087Z",
+              "timestamp_confirmacion": "2026-11-10T08:02:30.207Z",
+              "latencia_ms": 210,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 21,
+              "estado_sincronizacion": "sincronizado"
+            }
           },
           {
             "id": "EV-X-005",
             "evento": "Desincronizacion de relojes entre sistemas",
-            "propiedad_integridad": ["Trazabilidad", "Consistencia"],
+            "propiedad_integridad": [
+              "Trazabilidad",
+              "Consistencia"
+            ],
             "control": "Sincronizacion NTP y validacion de sellos de tiempo",
-            "resultado_esperado": "Cronologia de eventos confiable"
+            "resultado_esperado": "Cronologia de eventos confiable",
+            "sincronizacion": {
+              "fuente_reloj": "Interfaz ERP-MES",
+              "timestamp_origen": "2026-11-10T08:02:37.014Z",
+              "timestamp_recepcion": "2026-11-10T08:02:37.224Z",
+              "timestamp_confirmacion": "2026-11-10T08:02:37.344Z",
+              "latencia_ms": 210,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 22,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ],
         "conciliacion": [
           {
             "id": "EV-X-006",
             "evento": "Cierre de turno o periodo con diferencias ERP vs MES",
-            "propiedad_integridad": ["Consistencia", "Durabilidad"],
+            "propiedad_integridad": [
+              "Consistencia",
+              "Durabilidad"
+            ],
             "control": "Conciliacion automatica y ajustes autorizados",
-            "resultado_esperado": "Diferencias explicadas y documentadas"
+            "resultado_esperado": "Diferencias explicadas y documentadas",
+            "sincronizacion": {
+              "fuente_reloj": "Interfaz ERP-MES",
+              "timestamp_origen": "2026-11-10T08:02:44.151Z",
+              "timestamp_recepcion": "2026-11-10T08:02:44.361Z",
+              "timestamp_confirmacion": "2026-11-10T08:02:44.481Z",
+              "latencia_ms": 210,
+              "tolerancia_desfase_ms": 500,
+              "secuencia": 23,
+              "estado_sincronizacion": "sincronizado"
+            }
           }
         ]
       }
     }
+  },
+  "sincronizacion_tiempo": {
+    "formato_timestamp": "ISO 8601 en UTC (equivalente a xs:dateTime de B2MML)",
+    "ejemplo": "2026-11-10T08:00:00.000Z",
+    "zona_horaria_referencia": "UTC",
+    "fuente_de_reloj": "NTP / PTP con servidor maestro unico de planta",
+    "campos": {
+      "timestamp_origen": "Momento en que ocurre el evento en la fuente (sensor, PLC, MES o ERP)",
+      "timestamp_recepcion": "Momento en que el sistema destino recibe el mensaje",
+      "timestamp_confirmacion": "Momento en que la transaccion queda confirmada (commit)",
+      "latencia_ms": "timestamp_recepcion - timestamp_origen",
+      "tolerancia_desfase_ms": "Desfase maximo permitido entre relojes para ese nivel",
+      "secuencia": "Numero consecutivo global para ordenar eventos con timestamps iguales"
+    },
+    "reglas": [
+      "Todo evento debe llevar timestamp_origen generado en la fuente, no en el destino",
+      "Si latencia_ms excede la tolerancia, el evento se marca 'revisar_sincronizacion'",
+      "Eventos con timestamp_origen posterior a timestamp_recepcion se rechazan (reloj adelantado)",
+      "Los eventos se procesan por timestamp_origen y, en empate, por secuencia"
+    ],
+    "tolerancia_por_nivel_ms": {
+      "nivel_0": 1000,
+      "nivel_1": 10,
+      "nivel_2": 50,
+      "nivel_3": 500,
+      "nivel_4": 1000,
+      "transversales": 500
+    },
+    "nota": "Los valores de timestamp de cada evento son de ejemplo; sustituir con los reales de la integracion"
   }
 }
