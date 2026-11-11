@@ -1,5 +1,7 @@
 name: Neo4j Tutorial
-
+push:
+    branches:
+      - feature/183435
 on:
   workflow_dispatch:
     inputs:
