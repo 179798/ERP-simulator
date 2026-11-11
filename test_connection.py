@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
 load_dotenv()
-# Ojo aquí: usamos NEO4J_USER tal como lo pusiste en tu .env
 NEO4J_USER = os.getenv("NEO4J_USER")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 NEO4J_URI = os.getenv("NEO4J_URI")
