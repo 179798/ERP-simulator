@@ -40,4 +40,4 @@ La función `calculate_mrp` ejecuta correctamente la explosión de materiales mu
 * **Siguiente paso:** ¿Cómo podríamos adaptar esta función para que ejecute una consulta a la tabla `bill_of_materials` en lugar de leer el diccionario local?
 
 ---
-Buen avance general. ¿Sobre cuál de estos puntos prefieren comenzar a iterar?
+Buen avance general
