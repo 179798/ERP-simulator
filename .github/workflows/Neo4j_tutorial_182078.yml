@@ -1,73 +1,135 @@
-name: Neo4j Tutorial
+name: 182078-Neo4j
 
 on:
   push:
     branches:
       - featured/182078
   workflow_dispatch:
-    inputs:
+  inputs:
       order_quantity:
         description: "Cantidad de Gaming PCs a fabricar"
         required: true
         default: "30"
-
 jobs:
-  neo4j-tutorial:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: erpdb
+          POSTGRES_USER: erp
+          POSTGRES_PASSWORD: erp
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
       neo4j:
         image: neo4j:5.26-community
         env:
           NEO4J_AUTH: neo4j/password
+
         ports:
           - 7474:7474
           - 7687:7687
+env:
+      ORDER_QUANTITY: ${{ github.event.inputs.order_quantity }}
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: erpdb
+      POSTGRES_USER: erp
+      POSTGRES_PASSWORD: erp
 
-    env:
+      MONGO_HOST: localhost
+      MONGO_PORT: 27017
+
       NEO4J_HOST: localhost
       NEO4J_PORT: 7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: password
-      ORDER_QUANTITY: ${{ github.event.inputs.order_quantity || '30' }}
 
     steps:
-      - name: Descargar el repositorio
+      - name: Descargar el proyecto
         uses: actions/checkout@v4
 
-      - name: Configurar Python
+      - name: Preparar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Instalar dependencias
-        run: |
-          python -m pip install --upgrade pip
-          pip install neo4j
+      - name: Instalar paquetes
+        run: python -m pip install -r requirements.txt
 
-      - name: Esperar a que Neo4j esté disponible
+      - name: Show Docker Services
+        run: |
+          docker ps -a    
+
+      - name: Test Ports
+        run: |
+          nc -zv localhost 5432 || true
+          nc -zv localhost 27017 || true
+          nc -zv localhost 7687 || true
+          
+      - name: Esperar servicio Neo4j
         run: |
           python - <<'PY'
-          import os
           import time
           from neo4j import GraphDatabase
-
-          uri = f"bolt://{os.environ['NEO4J_HOST']}:{os.environ['NEO4J_PORT']}"
-          auth = (os.environ["NEO4J_USER"], os.environ["NEO4J_PASSWORD"])
-
-          for attempt in range(30):
+          for attempt in range(60):
               try:
-                  with GraphDatabase.driver(uri, auth=auth) as driver:
+                  with GraphDatabase.driver(
+                      "bolt://localhost:7687", auth=("neo4j", "password")
+                  ) as driver:
                       driver.verify_connectivity()
-                  print("Neo4j está listo.")
+                  print("Neo4j disponible")
                   break
-              except Exception as error:
-                  print(f"Intento {attempt + 1}/30: Neo4j aún inicia ({error}).")
+              except Exception:
                   time.sleep(2)
           else:
-              raise SystemExit("Neo4j no estuvo disponible a tiempo.")
+              raise RuntimeError("Neo4j no respondió")
           PY
 
-      - name: Ejecutar el tutorial de Neo4j
-        run: python src/neo4j_tutorial_erp.py
+      - name: Create Database Schema
+        run: |
+          python src/create_schema.py
+
+      - name: Load Master Data
+        run: |
+          python src/seed_data.py
+
+      - name: Run MRP Validation
+        run: |
+          python src/check_shortages.py
+          
+      - name: Load Graph In Neo4j
+        run: |
+          python -m src.neo4j_load
+
+      - name: Run Neo4j Shortage Analysis
+        run: |
+          python -m src.neo4j_shortages
+
+      - name: Set Python Path
+        run: |
+          echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV          
+
+      - name: Run Unit Tests
+        run: |
+          pytest -v
