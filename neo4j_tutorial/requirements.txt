@@ -1,4 +1,4 @@
 neo4j
 python-dotenv
-pandas
 tqdm
+pandas
