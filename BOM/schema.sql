@@ -21,6 +21,52 @@ CREATE TABLE conversiones_uom (
     CONSTRAINT chk_distintas_unidades CHECK (uom_origen_id <> uom_destino_id)
 );
 
+CREATE TABLE articulos (
+    sku VARCHAR(50) PRIMARY KEY,
+    descripcion VARCHAR(255) NOT NULL,
+    tipo_item VARCHAR(2) NOT NULL CHECK (tipo_item IN ('PT', 'SE', 'MP')),
+    uom_base_id VARCHAR(10) NOT NULL REFERENCES unidades_medida(uom_id) ON DELETE RESTRICT,
+    es_discreto BOOLEAN NOT NULL DEFAULT TRUE,
+    costo_estandar NUMERIC(14, 4) NOT NULL DEFAULT 0.0000 CHECK (costo_estandar >= 0),
+    tamano_lote_minimo NUMERIC(14, 4) NOT NULL DEFAULT 1.0000 CHECK (tamano_lote_minimo > 0),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+--CABECERA DEL BILL OF MATERIALS (BOM_HEADER)--
+
+CREATE TABLE bom_cabecera (
+    bom_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    parent_sku VARCHAR(50) NOT NULL REFERENCES articulos(sku) ON DELETE RESTRICT,
+    version_codigo VARCHAR(20) NOT NULL,
+    cantidad_base NUMERIC(14, 4) NOT NULL DEFAULT 1.0000 CHECK (cantidad_base > 0),
+    uom_id VARCHAR(10) NOT NULL REFERENCES unidades_medida(uom_id) ON DELETE RESTRICT,
+    estado VARCHAR(15) NOT NULL DEFAULT 'BORRADOR' CHECK (estado IN ('BORRADOR', 'ACTIVO', 'INACTIVO', 'OBSOLETO')),
+    fecha_inicio TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_fin TIMESTAMPTZ NULL,
+    notas_ingenieria TEXT NULL,
+    usuario_creacion VARCHAR(100) NOT NULL,
+    usuario_aprobacion VARCHAR(100) NULL,
+    fecha_aprobacion TIMESTAMPTZ NULL,
+    version_concurrencia INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_parent_version UNIQUE (parent_sku, version_codigo),
+    CONSTRAINT chk_rango_fechas CHECK (fecha_fin IS NULL OR fecha_fin > fecha_inicio),
+    CONSTRAINT chk_auditoria_aprobacion CHECK (
+        (estado = 'BORRADOR' AND usuario_aprobacion IS NULL AND fecha_aprobacion IS NULL) OR
+        (estado <> 'BORRADOR' AND usuario_aprobacion IS NOT NULL AND fecha_aprobacion IS NOT NULL)
+    )
+);
+
+ALTER TABLE bom_cabecera
+ADD CONSTRAINT no_traslape_versiones_activas
+EXCLUDE USING gist (
+    parent_sku WITH =,
+    tstzrange(fecha_inicio, COALESCE(fecha_fin, 'infinity'::TIMESTAMPTZ), '[)') WITH &&
+) WHERE (estado = 'ACTIVO');
+
 CREATE TABLE bom_detalle (
     linea_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     bom_id BIGINT NOT NULL REFERENCES bom_cabecera(bom_id) ON DELETE RESTRICT,
