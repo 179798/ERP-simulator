@@ -70,3 +70,5 @@ Para mejorar el control de las existencias y reducir los errores durante las ope
 6. **Fortalecer la trazabilidad:** asegurar que los materiales que requieren control por lotes o números de serie tengan esta información registrada en cada movimiento correspondiente.
 
 Con estas mejoras sería posible mantener un control más confiable de las existencias, reducir errores en las operaciones y asegurar que los datos del inventario permanezcan consistentes durante el funcionamiento del ERP.
+
+Este documento, no es de este modulo
