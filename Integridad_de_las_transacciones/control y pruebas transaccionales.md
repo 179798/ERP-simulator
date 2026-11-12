@@ -155,3 +155,5 @@ Para completar una revisión técnica con evidencia, se recomienda comprobar lo 
 El control de integridad transaccional es importante porque las operaciones del ERP-Simulator están relacionadas: un error en el registro de una entrega, una recepción o una actualización de inventario puede afectar otros procesos. Las propiedades ACID ayudan a definir cómo deben guardarse los cambios, mientras que el control de concurrencia, la auditoría y las pruebas permiten detectar y prevenir inconsistencias.
 
 La documentación y los requerimientos disponibles permiten identificar qué controles son necesarios, pero **no bastan para demostrar que todos ya estén programados y probados**. Por esta razón, las mejoras propuestas se enfocan en confirmar o revertir operaciones completas, proteger los datos frente a accesos simultáneos y ampliar las pruebas automatizadas, sin modificar el código como parte de esta entrega.
+
+Retroalimentación: todo esta alineado, no hay retroalimentacion :)
