@@ -1,73 +1,59 @@
+
 import os
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
 load_dotenv()
+
+URI = os.getenv("NEO4J_URI")
+USERNAME = os.getenv("NEO4J_USERNAME")
+PASSWORD = os.getenv("NEO4J_PASSWORD")
+
 driver = GraphDatabase.driver(
-    os.getenv("NEO4J_URI"),
-    auth=(os.getenv("NEO4J_USERNAME"), os.getenv("NEO4J_PASSWORD")),
+    URI,
+    auth=(USERNAME, PASSWORD)
 )
 
-query = """
-MATCH (t:Team)-[:WON]->(m:Match)-[:PART_OF]->(:Tournament {name: "FIFA World Cup"})
-RETURN t.name AS Team, COUNT(m) AS MatchesWon
-ORDER BY MatchesWon DESC
-LIMIT 1
-"""
-records, summary, keys = driver.execute_query(query, database_="neo4j")
-for record in records:
-    print(record.data())
-query = """
-MATCH (t:Team)-[:WON]->(m:Match)-[:PART_OF]->(:Tournament {name: $tournament})
-RETURN t.name AS Team, COUNT(m) AS MatchesWon
-ORDER BY MatchesWon DESC
-LIMIT $limit
-"""
-records, summary, keys = driver.execute_query(
-   query, database_="neo4j", tournament="UEFA Euro", limit=3,
-)
-for record in records:
-   print(record.data())
+try:
+    driver.verify_connectivity()
+    print("Conexión exitosa con Neo4j\n")
 
-from neo4j.time import DateTime
-
-def add_new_coach(driver, coach_name, team_name, start_date, end_date):
+    # Consulta 1: equipo con más partidos ganados en mundiales
     query = """
-    MATCH (t:Team {name: $team_name})
-    CREATE (c:Coach {name: $coach_name})
-    CREATE (c)-[r:COACHES]->(t)
-    SET r.start_date = $start_date
-    SET r.end_date = $end_date
+    MATCH (t:Team)-[:WON]->(m:Match)-[:PART_OF]->(:Tournament {name: "FIFA World Cup"})
+    RETURN t.name AS Equipo, COUNT(m) AS PartidosGanados
+    ORDER BY PartidosGanados DESC
+    LIMIT 1
     """
-    result = driver.execute_query(
-        query,
-        database_="neo4j",
-        coach_name=coach_name,
-        team_name=team_name,
-        start_date=start_date,
-        end_date=end_date,
+
+    records, summary, keys = driver.execute_query(
+        query
     )
-    summary = result.summary
-    print(f"Added new coach: {coach_name} for existing team {team_name}")
-    print(f"Nodes created: {summary.counters.nodes_created}")
-    print(f"Relationships created: {summary.counters.relationships_created}")
 
-add_new_coach(driver, "Lionel Scaloni", "Argentina", DateTime(2018, 6, 1), None)
+    print("Equipo con más partidos ganados en mundiales:")
+    for record in records:
+        print(record.data())
 
-def top_goal_scorers(tx, tournament, limit):
+    # Consulta 2: equipos con más partidos ganados en la Euro
     query = """
-    MATCH (p:Player)-[s:SCORED_IN]->(m:Match)-[:PART_OF]->(t:Tournament)
-    WHERE t.name = $tournament
-    RETURN p.name AS Player, COUNT(s) AS Goals
-    ORDER BY Goals DESC
-    LIMIT $limit
+    MATCH (t:Team)-[:WON]->(m:Match)-[:PART_OF]->(:Tournament {name: $tournament})
+    RETURN t.name AS Equipo, COUNT(m) AS PartidosGanados
+    ORDER BY PartidosGanados DESC
+    LIMIT $limite
     """
-    result = tx.run(query, tournament=tournament, limit=limit)
-    return [record.data() for record in result]
 
-with driver.session(database="neo4j") as session:
-    result = session.execute_read(top_goal_scorers, "FIFA World Cup", 5)
-    for record in result:
-        print(record)
+    records, summary, keys = driver.execute_query(
+        query,
+        tournament="UEFA Euro",
+        limite=3
+    )
 
-driver.close()
+    print("\nEquipos con más partidos ganados en la Euro:")
+    for record in records:
+        print(record.data())
+
+except Exception as e:
+    print("Ocurrió un error:", e)
+
+finally:
+    driver.close()

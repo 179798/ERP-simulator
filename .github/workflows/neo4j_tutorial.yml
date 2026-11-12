@@ -1,35 +1,28 @@
-name: Neo4j Tutorial
+
+name: Neo4j Tutorial AuraDB
 
 on:
   workflow_dispatch:
+
   push:
     branches:
-      - feature/184661
+      - feature/185393
     paths:
       - "neo4j_tutorial/**"
       - ".github/workflows/neo4j_tutorial.yml"
-  pull_request:
-    branches:
-      - development
+
+permissions:
+  contents: read
 
 jobs:
   neo4j-tutorial:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    services:
-      neo4j:
-        image: neo4j:5.26-community
-        env:
-          NEO4J_AUTH: neo4j/password
-        ports:
-          - 7474:7474
-          - 7687:7687
+    timeout-minutes: 45
 
     env:
-      NEO4J_URI: bolt://localhost:7687
-      NEO4J_USERNAME: neo4j
-      NEO4J_PASSWORD: password
+      NEO4J_URI: ${{ secrets.NEO4J_URI }}
+      NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
+      NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
       NEO4J_DATABASE: neo4j
 
     defaults:
@@ -46,15 +39,19 @@ jobs:
           python-version: "3.12"
 
       - name: Install Dependencies
-        run: pip install neo4j python-dotenv tqdm pandas
-
-      - name: Wait For Neo4j
         run: |
-          for i in $(seq 1 30); do
-            curl -s http://localhost:7474 && break
-            echo "Esperando a Neo4j..."
-            sleep 2
-          done
+          python -m pip install --upgrade pip
+          pip install neo4j python-dotenv pandas tqdm
+
+      - name: Verify Secrets
+        run: |
+          python - <<'PY'
+          import os
+          for key in ("NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD"):
+              if not os.getenv(key):
+                  raise SystemExit(f"Falta configurar el secreto: {key}")
+          print("Credenciales configuradas")
+          PY
 
       - name: Test Connection
         run: python conexion.py
