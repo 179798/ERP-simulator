@@ -1,8 +1,9 @@
 import os
+
 from neo4j import GraphDatabase
 
 
-COMPONENTS = [
+MATERIALS = [
     {"code": "CPU001", "name": "CPU Ryzen 7", "quantity": 1},
     {"code": "MB001", "name": "Motherboard B650", "quantity": 1},
     {"code": "RAM001", "name": "RAM 16GB DDR5", "quantity": 2},
@@ -11,164 +12,152 @@ COMPONENTS = [
     {"code": "GPU001", "name": "Graphics Card RTX", "quantity": 1},
 ]
 
-
-def check_indexes(driver):
-    index_queries = [
+def create_indexes(driver):
+    queries = [
         """
         CREATE INDEX product_code_index IF NOT EXISTS
-        FOR (p:Product)
-        ON (p.code)
+        FOR (product:Product)
+        ON (product.code)
         """,
         """
         CREATE INDEX material_code_index IF NOT EXISTS
-        FOR (m:Material)
-        ON (m.code)
-        """
+        FOR (material:Material)
+        ON (material.code)
+        """,
     ]
 
-    for statement in index_queries:
-        driver.execute_query(statement, database_="neo4j")
+    for query in queries:
+        driver.execute_query(query, database_="neo4j")
 
-    print("Los índices de productos y materiales están listos.")
+    print("Índices verificados para Product.code y Material.code.")
 
-
-def _test_create_operation(tx):
+def _create_and_remove_example(tx):
     result = tx.run(
         """
-        CREATE (sample:TutorialExample {name: $value})
-        RETURN sample.name AS created_name
+        CREATE (example:TutorialExample {name: $name})
+        RETURN example.name AS name
         """,
-        value="Prueba de creación"
+        name="Ejemplo CREATE",
     )
 
-    data = result.single()
+    record = result.single()
 
     tx.run(
         """
-        MATCH (sample:TutorialExample {name: $value})
-        DELETE sample
+        MATCH (example:TutorialExample {name: $name})
+        DELETE example
         """,
-        value=data["created_name"]
+        name=record["name"],
     ).consume()
 
-    return data["created_name"]
+    return record["name"]
 
 
-def test_create(driver):
+def demonstrate_create(driver):
     with driver.session(database="neo4j") as session:
-        created_name = session.execute_write(_test_create_operation)
+        example_name = session.execute_write(_create_and_remove_example)
 
-    print(f"Se creó el nodo: {created_name}")
-    print("El nodo de prueba fue eliminado correctamente.")
+    print(f"CREATE creó el nodo de ejemplo: {example_name}")
+    print("La transacción lo eliminó para no dejar datos de prueba.")
 
-
-def _save_product_structure(tx, code, name, components):
-    statement = """
-    MERGE (p:Product {code: $code})
-    SET p.name = $name
-    WITH p
-    UNWIND $components AS component
-    MERGE (m:Material {code: component.code})
-    SET m.name = component.name
-    MERGE (p)-[r:REQUIRES]->(m)
-    SET r.quantity = component.quantity
-    RETURN count(m) AS total_components
+def _write_bom_graph(tx, product_code, product_name, materials):
+    query = """
+    MERGE (product:Product {code: $product_code})
+    SET product.name = $product_name
+    WITH product
+    UNWIND $materials AS item
+    MERGE (material:Material {code: item.code})
+    SET material.name = item.name
+    MERGE (product)-[requires:REQUIRES]->(material)
+    SET requires.quantity = item.quantity
+    RETURN count(material) AS components
     """
 
     result = tx.run(
-        statement,
-        code=code,
-        name=name,
-        components=components
+        query,
+        product_code=product_code,
+        product_name=product_name,
+        materials=materials,
     )
 
     record = result.single()
     summary = result.consume()
 
     return (
-        record["total_components"],
+        record["components"],
         summary.counters.nodes_created,
-        summary.counters.relationships_created
+        summary.counters.relationships_created,
     )
 
 
-def save_product_structure(driver):
+def create_bom_graph(driver):
     with driver.session(database="neo4j") as session:
         return session.execute_write(
-            _save_product_structure,
+            _write_bom_graph,
             "PC001",
             "Gaming PC",
-            COMPONENTS
+            MATERIALS,
         )
 
 
-def _calculate_material_requirements(tx, code, quantity):
-    statement = """
-    MATCH (p:Product {code: $code})
-          -[r:REQUIRES]->
-          (m:Material)
-    RETURN m.name AS material_name,
-           r.quantity * $quantity AS total_required
-    ORDER BY material_name
+def _read_required_materials(tx, product_code, order_quantity):
+    query = """
+    MATCH (product:Product {code: $product_code})
+          -[requires:REQUIRES]->
+          (material:Material)
+    RETURN material.name AS material,
+           requires.quantity * $order_quantity AS required
+    ORDER BY material
     """
 
     result = tx.run(
-        statement,
-        code=code,
-        quantity=quantity
+        query,
+        product_code=product_code,
+        order_quantity=order_quantity,
     )
 
-    return [row.data() for row in result]
+    return [record.data() for record in result]
 
 
-def calculate_material_requirements(driver, product_code, quantity):
+def get_required_materials(driver, product_code, order_quantity):
     with driver.session(database="neo4j") as session:
         return session.execute_read(
-            _calculate_material_requirements,
+            _read_required_materials,
             product_code,
-            quantity
+            order_quantity,
         )
 
 
 def main():
     host = os.getenv("NEO4J_HOST", "localhost")
     port = os.getenv("NEO4J_PORT", "7687")
-    user = os.getenv("NEO4J_USER", "neo4j")
+    username = os.getenv("NEO4J_USER", "neo4j")
     password = os.getenv("NEO4J_PASSWORD", "password")
-    quantity = int(os.getenv("ORDER_QUANTITY", "30"))
+    order_quantity = int(os.getenv("ORDER_QUANTITY", "30"))
 
-    connection_uri = f"bolt://{host}:{port}"
+    uri = f"bolt://{host}:{port}"
 
-    with GraphDatabase.driver(
-        connection_uri,
-        auth=(user, password)
-    ) as driver:
-
+    with GraphDatabase.driver(uri, auth=(username, password)) as driver:
         driver.verify_connectivity()
-        print("Conexión establecida con la base de datos Neo4j.")
+        print("Conexión con Neo4j correcta.")
 
-        check_indexes(driver)
-        test_create(driver)
+        create_indexes(driver)
+        demonstrate_create(driver)
 
-        total, created_nodes, created_relations = save_product_structure(driver)
+        component_count, nodes_created, relationships_created = create_bom_graph(driver)
+        print(f"Componentes relacionados: {component_count}")
+        print(f"Nodos creados: {nodes_created}")
+        print(f"Relaciones creadas: {relationships_created}")
 
-        print(f"Total de materiales relacionados: {total}")
-        print(f"Nodos nuevos: {created_nodes}")
-        print(f"Relaciones nuevas: {created_relations}")
-
-        materials = calculate_material_requirements(
+        requirements = get_required_materials(
             driver,
             product_code="PC001",
-            quantity=quantity
+            order_quantity=order_quantity,
         )
 
-        print(f"\nComponentes requeridos para fabricar {quantity} Gaming PC:")
-
-        for material in materials:
-            print(
-                f"{material['material_name']}: "
-                f"{material['total_required']}"
-            )
+        print(f"\nMateriales necesarios para {order_quantity} Gaming PC:")
+        for item in requirements:
+            print(f"{item['material']}: {item['required']}")
 
 
 if __name__ == "__main__":
