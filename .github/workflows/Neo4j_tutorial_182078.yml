@@ -1,11 +1,7 @@
 name: 182078-Neo4j
-
 on:
-  push:
-    branches:
-      - featured/182078
   workflow_dispatch:
-  inputs:
+    inputs:
       order_quantity:
         description: "Cantidad de Gaming PCs a fabricar"
         required: true
@@ -30,7 +26,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-
       mongodb:
         image: mongo:7.0
         ports:
@@ -40,7 +35,6 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
-
       neo4j:
         image: neo4j:5.26-community
         env:
@@ -49,7 +43,8 @@ jobs:
         ports:
           - 7474:7474
           - 7687:7687
-env:
+
+    env:
       ORDER_QUANTITY: ${{ github.event.inputs.order_quantity }}
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
@@ -66,70 +61,43 @@ env:
       NEO4J_PASSWORD: password
 
     steps:
-      - name: Descargar el proyecto
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Preparar Python
+      - name: Setup Python
         uses: actions/setup-python@v5
+
         with:
           python-version: "3.12"
 
-      - name: Instalar paquetes
-        run: python -m pip install -r requirements.txt
-
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
       - name: Show Docker Services
         run: |
           docker ps -a    
-
       - name: Test Ports
         run: |
           nc -zv localhost 5432 || true
           nc -zv localhost 27017 || true
           nc -zv localhost 7687 || true
-          
-      - name: Esperar servicio Neo4j
+    
+      - name: Wait For Services
         run: |
-          python - <<'PY'
-          import time
-          from neo4j import GraphDatabase
-          for attempt in range(60):
-              try:
-                  with GraphDatabase.driver(
-                      "bolt://localhost:7687", auth=("neo4j", "password")
-                  ) as driver:
-                      driver.verify_connectivity()
-                  print("Neo4j disponible")
-                  break
-              except Exception:
-                  time.sleep(2)
-          else:
-              raise RuntimeError("Neo4j no respondió")
-          PY
-
+          python src/wait_for_services.py
       - name: Create Database Schema
         run: |
           python src/create_schema.py
-
       - name: Load Master Data
         run: |
           python src/seed_data.py
-
       - name: Run MRP Validation
         run: |
           python src/check_shortages.py
-          
-      - name: Load Graph In Neo4j
-        run: |
-          python -m src.neo4j_load
-
-      - name: Run Neo4j Shortage Analysis
-        run: |
-          python -m src.neo4j_shortages
-
       - name: Set Python Path
         run: |
           echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV          
-
       - name: Run Unit Tests
         run: |
           pytest -v
